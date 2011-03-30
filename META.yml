@@ -1,0 +1,27 @@
+---
+abstract: 'Interface to test and compare Excel files.'
+author:
+  - 'Mohammad S Anwar, <mohammad.anwar@yahoo.com>'
+build_requires:
+  File::Spec: 0
+  Readonly: 0
+  Scalar::Util: 0
+  Spreadsheet::ParseExcel: 0.58
+  Test::Builder: 0
+  Test::Builder::Tester: 0
+  Test::More: 0.47
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3607'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Test-Excel
+provides:
+  Test::Excel:
+    file: lib/Test/Excel.pm
+    version: 1.21
+resources:
+  license: http://dev.perl.org/licenses/
+version: 1.21
