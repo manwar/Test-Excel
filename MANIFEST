@@ -1,5 +1,4 @@
 Changes
-Build.PL
 Makefile.PL
 MANIFEST
 SIGNATURE
@@ -35,5 +34,3 @@ t/spec-1.txt
 t/spec-2.txt
 t/spec-3.txt
 t/manifest.t
-META.yml
-SIGNATURE    Added here by Module::Build

@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.66.
+signed via the Module::Signature module, version 0.73.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,14 +14,12 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 7d0d029c3e53f389e1a7eb863642b9ed5a0ffa1e Build.PL
-SHA1 2a2d380d651b6563e3b2b06edc3eb2a92e6e5f51 Changes
-SHA1 c1e6e3645436ab8a36f8dbc5171ea08ae8340646 MANIFEST
-SHA1 7d20e4e840781030202bb045d5ab81b3fd1b68b0 MANIFEST.SKIP
-SHA1 f6fad4c87806fe33e346c9887c3bfefb0d16e6a4 META.yml
-SHA1 8cf421680e63c04880c0612e313b9afaee03cfa4 Makefile.PL
-SHA1 3f2134eb41e6034d1df5a80eca394e5bfda9d391 README
-SHA1 b4699c8e439bec1632102e31f68e4f1afae00850 lib/Test/Excel.pm
+SHA1 69ee622a16310917e2be74412e849393986183aa Changes
+SHA1 841b3700466c1512825b1f99203a6501e680c2f9 MANIFEST
+SHA1 5f29cdcbfacb9c46ac155fff9844aceeb064aef1 MANIFEST.SKIP
+SHA1 bd625297c7f23914e69367907cb87f629c3804d1 Makefile.PL
+SHA1 520d83d06291387427540bcb6f6a36babf840bec README
+SHA1 2dec13b33917eddc2c9d527f7a3969946b08290a lib/Test/Excel.pm
 SHA1 24d1412b487160cb73a76b751eb93cec3c4bb6cc t/00-signature.t
 SHA1 8ba68073bfaa8e7327910bc7048532bf6f43f30d t/10_Test-Excel_test.t
 SHA1 2bbb00976f8d85b6eca109685bce084466cadcba t/20_cmp_excel.t
@@ -52,13 +50,13 @@ SHA1 55eab7e9c2a089ab5d7f9e368fa297edceef8eaa t/spec-1.txt
 SHA1 24ad2818a0f95f3c9a5dfaca47a1e033dfc7e3ac t/spec-2.txt
 SHA1 a453ab4a9fd024a5f16c4e01c7f1cee766a45926 t/spec-3.txt
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.14 (MingW32)
+Version: GnuPG v1
 
-iQEcBAEBAgAGBQJNkH60AAoJEPYcXBXhRYOhqCMIAJn0YfRtcH+PzR2EeG8KnYox
-fmOiMbgabMArgndy5MpBHeG/f0pAqUV6FWqVloRLGtllLR4aY5y2y+nNqC04lpTW
-Rp9TUBVvXDP1FlRsVgJj6jsoSr+z+k/bjbdoyP6Pf9TnwvJ5/GJyMD8sL3kDXka7
-KICXVSjRfdsVho0SFUPUY2GcoexK/zIrazJCacQEolo/gTNViddhPL+sifD51+/B
-Z1nZC8Yu0d3ehAiuv7nfqJhzzriMCJKMZGzV9QeVIYWbq9mviaXaYXzHMiD3+/45
-+aJD0Ji2/loc1zZ68Ps2f6uQTksBJd7qvZxUVNfzI6HAKAzZb0hUrVjVyTAquDA=
-=LiWa
+iQEcBAEBAgAGBQJUE64VAAoJENoXJXWo7C/pfvsH/Am1bgPIAxOOqRvOiRUtkvdZ
+CJqdMLO8gZjktWyyRwOxKsYW0KAIrX438WKZAhJJRR6bOe05+xlA3yxdHnXkvzzZ
+ajUViUi7gqo/w/qqqYweZz1hO2E7xzRMc/1CYz0FH4x3sNDl2pJVWoM9OXSBTdIu
+X3PG1ZI1cON6zsiQ0LhzrD4B3ZF0vP8L358xZyVyjZihuaVMssWVvezOel3B2p5y
+3eGbxUHBbF31/U4P0UDQEcElkZ5YPzpNFtXS+13vOmGSETjCrITKrIL+xBfKnKn0
+hcPBjZMjWXz7xtoMFasfI38PgbN9Yl3ZbSVr0xkrK4TY8lBQKhI+bk2foFY/3Ls=
+=LGbC
 -----END PGP SIGNATURE-----

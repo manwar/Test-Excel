@@ -8,3 +8,4 @@
 ^Build.bat$
 ^pod2htm
 ^_build/
+^.git/
