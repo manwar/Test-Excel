@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.27  Sun Sep 14 10:05:00 2014
+      - Updated @EXPORT list.
+
 1.26  Sun Sep 14 09:55:40 2014
       - Tidied up pod documentation.
       - Hide helper methods.

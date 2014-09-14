@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION = '1.26';
+$Test::Excel::VERSION = '1.27';
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.26
+Version 1.27
 
 =cut
 
@@ -22,10 +22,9 @@ use Scalar::Util 'blessed';
 use Spreadsheet::ParseExcel;
 use Spreadsheet::ParseExcel::Utility qw(int2col col2int);
 
-#require Exporter;
-
+require Exporter;
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(cmp_excel compare_excel column_row letter_to_number number_to_letter cells_within_range);
+our @EXPORT = qw(cmp_excel compare_excel);
 
 $|=1;
 
