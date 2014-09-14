@@ -1,6 +1,16 @@
 package Test::Excel;
 
-$Test::Excel::VERSION = '1.25';
+$Test::Excel::VERSION = '1.26';
+
+=head1 NAME
+
+Test::Excel - Interface to test and compare Excel files.
+
+=head1 VERSION
+
+Version 1.26
+
+=cut
 
 use strict; use warnings;
 
@@ -12,24 +22,14 @@ use Scalar::Util 'blessed';
 use Spreadsheet::ParseExcel;
 use Spreadsheet::ParseExcel::Utility qw(int2col col2int);
 
-require Exporter;
+#require Exporter;
 
 our @ISA    = qw(Exporter);
 our @EXPORT = qw(cmp_excel compare_excel column_row letter_to_number number_to_letter cells_within_range);
 
-=head1 NAME
-
-Test::Excel - Interface to test and compare Excel files.
-
-=head1 VERSION
-
-Version 1.25
-
-=cut
-
 $|=1;
 
-our $DEBUG = 0;
+my $DEBUG                = 0;
 my $ALMOST_ZERO          = 10**-16;
 my $IGNORE               = 1;
 my $SPECIAL_CASE         = 2;
@@ -39,16 +39,16 @@ my $MAX_ERRORS_PER_SHEET = 0;
 
 This  module is meant to be used for testing  custom  generated  Excel  files, it
 provides two functions at the moment, which is C<cmp_excel> and C<compare_excel>.
-These can be used to compare_excel 2  Excel files to see if they are I<visually>
+These can be used to compare_excel 2  Excel files to see  if they are I<visually>
 similar. The function C<cmp_excel> is for testing purpose where function C<compare_excel>
 can be used as standalone.
 
 =head1 RULE
 
 The new paramter has been added to both method cmp_excel() & method compare_excel()
-called RULE. This is optional, however, this would allow to apply your own rule for
-comparison. This should  be passed in as a reference to a HASH with the keys sheet,
-tolerance,  sheet_tolerance  and  optionally  swap_check,  error_limit  and message
+called RULE. This is optional,however,this would allow to apply your own rule for
+comparison. This should  be passed in as reference to a HASH with the keys sheet,
+tolerance, sheet_tolerance and  optionally  swap_check,  error_limit  and message
 (only relevant to method cmp_excel()).
 
     +-----------------+---------------------------------------------------------------------+
@@ -62,6 +62,18 @@ tolerance,  sheet_tolerance  and  optionally  swap_check,  error_limit  and mess
     | error_limit     | Number (optional). Limit error per sheet. Default is 0.             |
     | message         | String (optional). Only required when calling method cmp_excel().   |
     +-----------------+---------------------------------------------------------------------+
+
+=head1 SPECIFICATION FILE
+
+Spec  file containing rules used should be in the format mentioned below. Key and
+values are space seperated.
+
+    sheet       Sheet1
+    range       A3:B14
+    range       B5:C5
+    sheet       Sheet2
+    range       A1:B2
+    ignorerange B3:B8
 
 =head1 What is "Visually" Similar?
 
@@ -343,27 +355,6 @@ sub compare_excel {
     return $status;
 }
 
-=head2 parse()
-
-This method parse specification file provided by the user.It expects spec file to
-to be in a format mentioned below. Key and values are space seperated.
-
-    sheet       Sheet1
-    range       A3:B14
-    range       B5:C5
-    sheet       Sheet2
-    range       A1:B2
-    ignorerange B3:B8
-
-They are grouped as sheet followed by one or more ranges.
-
-    use strict; use warnings;
-    use Test::Excel;
-
-    my $data = Test::Excel::parse('spec-1.txt');
-
-=cut
-
 sub parse {
     my ($spec) = @_;
 
@@ -407,18 +398,6 @@ sub parse {
     return $data;
 }
 
-=head2 column_row()
-
-This method accepts a cell address and returns column and row address as a list.
-
-    use strict; use warnings;
-    use Test::Excel;
-
-    my $cell = 'A23';
-    my ($col, $row) = Test::Excel::column_row($cell);
-
-=cut
-
 sub column_row {
     my ($cell) = @_;
 
@@ -430,53 +409,17 @@ sub column_row {
     return ($1, $2);
 }
 
-=head2 letter_to_number()
-
-This  method accepts a letter and returns back its equivalent number. This simply
-wraps around Spreadsheet::ParseExcel::Utility::col2int().
-
-    use strict; use warnings;
-    use Test::Excel;
-
-    my $number = Test::Excel::letter_to_number('AB');
-
-=cut
-
 sub letter_to_number {
     my ($letter) = @_;
 
     return col2int($letter);
 }
 
-=head2 number_to_letter()
-
-This  number  accepts  a  number  and  returns its equivalent letter. This simply
-wraps around Spreadsheet::ParseExcel::Utility::int2col().
-
-    use strict; use warnings;
-    use Test::Excel;
-
-    my $letter = Test::Excel::number_to_letter(27);
-
-=cut
-
 sub number_to_letter {
     my ($number) = @_;
 
     return int2col($number);
 }
-
-=head2 cells_within_range()
-
-This method accepts address range and returns all cell address within the range.
-
-    use strict; use warnings;
-    use Test::Excel;
-
-    my $range = 'A1:B3';
-    my $cells = Test::Excel::cells_within_range($range);
-
-=cut
 
 sub cells_within_range {
     my ($range) = @_;
@@ -572,19 +515,9 @@ sub _validate_rule {
     }
 }
 
-=head1 DEBUG
-
-Debug mode can be turned on / off by setting package variable $DEBUG, for example,
-
-    $Test::Excel::DEBUG = 1;
-
-You can set it anything greater than 1 for fine grained debug information. i.e.
-
-    $Test::Excel::DEBUG = 2;
-
 =head1 NOTES
 
-It should be clearly noted that this module does not claim to provide a fool-proof
+It should be clearly noted that this module does not claim to provide  fool-proof
 comparison of generated Excels. In fact there are still a number of ways in which
 I want to expand the existing comparison functionality.This module I<is> actively
 being developed for a number of projects  I  am  currently  working on, so expect

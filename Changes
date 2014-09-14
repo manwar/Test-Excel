@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Excel.
 
+1.26  Sun Sep 14 09:55:40 2014
+      - Tidied up pod documentation.
+      - Hide helper methods.
+
 1.25  Sat Sep 13 03:29:20 2014
       - Deleted Build.PL file.
       - Removed dependency of Readonly.pm and Carp.pm.
