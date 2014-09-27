@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.28  Sat Sep 27 01:09:10 2014
+      - Fixed typo in the README file.
+
 1.27  Sun Sep 14 10:05:00 2014
       - Updated @EXPORT list.
 

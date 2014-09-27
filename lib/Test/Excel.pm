@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION = '1.27';
+$Test::Excel::VERSION = '1.28';
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.27
+Version 1.28
 
 =cut
 
