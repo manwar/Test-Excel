@@ -1,6 +1,7 @@
 package Test::Excel;
 
-$Test::Excel::VERSION = '1.28';
+$Test::Excel::VERSION   = '1.29';
+$Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
 
@@ -8,13 +9,13 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.28
+Version 1.29
 
 =cut
 
 use strict; use warnings;
 
-use 5.0006;
+use 5.006;
 use IO::File;
 use Data::Dumper;
 use Test::Builder ();
@@ -602,7 +603,7 @@ L<http://search.cpan.org/dist/Test-Excel/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2010 - 2014 Mohammad S Anwar.
+Copyright (C) 2010 - 2015 Mohammad S Anwar.
 
 This  program  is  free software; you can redistribute it and/or modify it under
 the  terms  of the the Artistic License (2.0). You may obtain a copy of the full

@@ -32,7 +32,8 @@ WriteMakefile(
     clean => { FILES => 'Test-Excel-*' },
     (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (META_MERGE => {
         'meta-spec' => { version => 2 },
-        resources => {
+        provides    => { 'Test::Excel' => { file => 'lib/Test/Excel.pm', version => '1.29' } },
+        resources   => {
             repository => {
                 type => 'git',
                 url  => 'https://github.com/Manwar/Test-Excel.git',

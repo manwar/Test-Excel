@@ -1,5 +1,13 @@
 Revision history for Perl extension Test::Excel.
 
+1.29  Mon Jan 12 11:25:18 2015
+      - Updated Makefile.PL to generate the key 'provides' for META file correctly.
+      - Removed SIGNATURE file.
+      - Removed t/00-signature.t file.
+      - Added unit test to test META files.
+      - Added LICENSE file.
+      - Updated Copyright year information.
+
 1.28  Sat Sep 27 01:09:10 2014
       - Fixed typo in the README file.
 
