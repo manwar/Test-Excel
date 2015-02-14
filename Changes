@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.31  Sat Feb 14 23:05:18 2015
+      - Made the DEBUG parameter as environment variable.
+
 1.30  Sat Feb 14 22:15:18 2015
       - Patched the code to resolve the issue raised by Alexander Pletnev (RusAlex) in GitHub.
       - Added unit test for the use case.

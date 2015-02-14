@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.30';
+$Test::Excel::VERSION   = '1.31';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.30
+Version 1.31
 
 =cut
 
@@ -29,7 +29,6 @@ our @EXPORT = qw(cmp_excel compare_excel);
 
 $|=1;
 
-my $DEBUG                = 1;
 my $ALMOST_ZERO          = 10**-16;
 my $IGNORE               = 1;
 my $SPECIAL_CASE         = 2;
@@ -162,7 +161,8 @@ sub compare_excel {
     if (scalar(@gotWorkSheets) != scalar(@expWorkSheets)) {
         my $error = "ERROR: Sheets count mismatch. ";
         $error   .= "Got: [".scalar(@gotWorkSheets)."] exp: [".scalar(@expWorkSheets)."]\n";
-        _log_message($error) && return 0;
+        _log_message($error);
+        return 0;
     }
 
     my @sheets;
@@ -178,7 +178,8 @@ sub compare_excel {
 
         if (uc($gotSheetName) ne uc($expSheetName)) {
             my $error = "ERROR: Sheetname mismatch. Got: [$gotSheetName] exp: [$expSheetName].\n";
-            _log_message($error) && return 0;
+            _log_message($error);
+            return 0;
         }
 
         my ($gotRowMin, $gotRowMax) = $gotWorkSheet->row_range();
@@ -192,13 +193,15 @@ sub compare_excel {
         if (defined($gotRowMax) && defined($expRowMax) && ($gotRowMax != $expRowMax)) {
             my $error = "ERROR: Max row counts mismatch in sheet [$gotSheetName]. ";
             $error   .= "Got[$gotRowMax] Expected: [$expRowMax]\n";
-            _log_message($error) && return 0;
+            _log_message($error);
+            return 0;
         }
 
         if (defined($gotColMax) &&  defined($expColMax) && ($gotColMax != $expColMax)) {
             my $error = "ERROR: Max column counts mismatch in sheet [$gotSheetName]. ";
             $error   .= "Got[$gotColMax] Expected: [$expColMax]\n";
-            _log_message($error) && return 0;
+            _log_message($error);
+            return 0;
         }
 
         my ($swap);
@@ -252,7 +255,8 @@ sub compare_excel {
                                 _log_message("INFO: [NUMBER]:[$gotSheetName]:[N/A][".
                                              ($row+1)."][".($col+1)."]:[$gotData][$expData] ... ");
                                 if ($expData != $gotData) {
-                                    _log_message("[FAIL]\n") && return 0;
+                                    _log_message("[FAIL]\n");
+                                    return 0;
                                 }
                                 else {
                                     $status = 1;
@@ -287,19 +291,19 @@ sub compare_excel {
                             push @{$swap->{got}->{_number_to_letter($col-1)}}, $gotData;
 
                             if (($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
-                                _log_message("ERROR: Max error per sheet reached.[$error_on_sheet]\n")
-                                    && return $status;
+                                _log_message("ERROR: Max error per sheet reached.[$error_on_sheet]\n");
+                                return $status;
                             }
                         }
                     }
                     else {
-                        ($status == 0) && return $status;
+                        return $status if ($status == 0);
                     }
                 }
             } # col
 
             if (($error_on_sheet > 0) && ($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
-                ($status == 0) && return $status;
+                return $status if ($status == 0);
             }
         } # row
 
@@ -438,7 +442,7 @@ sub _log_message {
 
     return unless defined($message);
 
-    print {*STDOUT} $message if ($DEBUG);
+    print {*STDOUT} $message if ($ENV{DEBUG});
 }
 
 sub _validate_rule {
