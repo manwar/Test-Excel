@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Excel.
 
+1.30  Sat Feb 14 22:15:18 2015
+      - Patched the code to resolve the issue raised by Alexander Pletnev (RusAlex) in GitHub.
+      - Added unit test for the use case.
+
 1.29  Mon Jan 12 11:25:18 2015
       - Updated Makefile.PL to generate the key 'provides' for META file correctly.
       - Removed SIGNATURE file.

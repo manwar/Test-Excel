@@ -16,7 +16,7 @@ my ($cell, $range, $result, $error);
 
 $cell = 'A23';
 $exp_col = 'A'; $exp_row = 23;
-($got_col, $got_row) = Test::Excel::column_row($cell);
+($got_col, $got_row) = Test::Excel::_column_row($cell);
 is($got_col, $exp_col);
 is($got_row, $exp_row);
 
@@ -27,15 +27,15 @@ $exp_cells = [{row => 1, col => 0},
               {row => 2, col => 1},
               {row => 3, col => 0},
               {row => 3, col => 1}];
-$got_cells = Test::Excel::cells_within_range($range);
+$got_cells = Test::Excel::_cells_within_range($range);
 ok(eq_array($got_cells, $exp_cells));
 
 $exp_number = 27;
-$got_number = Test::Excel::letter_to_number('AB');
+$got_number = Test::Excel::_letter_to_number('AB');
 is($got_number, $exp_number);
 
 $exp_letter = 'AB';
-$got_letter = Test::Excel::number_to_letter(27);
+$got_letter = Test::Excel::_number_to_letter(27);
 is($got_letter, $exp_letter);
 
 eval
@@ -166,10 +166,7 @@ eval
 $error = $@;
 like($error, qr/ERROR: Missing key tolerance in the rule definitions./);
 
-eval
-{
-    Test::Excel::parse(catfile('t','spec-0.txt'));
-};
+eval { Test::Excel::_parse(catfile('t','spec-0.txt')); };
 $error = $@;
 like($error, qr/ERROR: Unable to locate spec file/);
 

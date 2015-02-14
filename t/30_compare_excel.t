@@ -2,7 +2,7 @@
 
 use strict; use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 9;
 use File::Spec::Functions;
 
 BEGIN { use_ok('Test::Excel'); }
@@ -11,6 +11,16 @@ is(compare_excel(
     catfile('t', 'hello_world.xls'),
     catfile('t', 'hello_world.xls'),
 ), 1);
+
+is(compare_excel(
+    catfile('t', 'got-0.xls'),
+    catfile('t', 'got-0.xls'),
+), 1);
+
+is(compare_excel(
+    catfile('t', 'got-0.xls'),
+    catfile('t', 'exp-0.xls'),
+), 0);
 
 is(compare_excel(
     catfile('t', 'got-1.xls'),

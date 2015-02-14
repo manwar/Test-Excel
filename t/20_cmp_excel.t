@@ -2,7 +2,7 @@
 
 use strict; use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use File::Spec::Functions;
 
 BEGIN { use_ok('Test::Excel'); }
@@ -10,7 +10,15 @@ BEGIN { use_ok('Test::Excel'); }
 cmp_excel(
     catfile('t', 'hello_world.xls'),
     catfile('t', 'hello_world.xls'),
-    {message => 'Our Excels were essentially the same.'}
+    {},
+    'Our Excels were essentially the same.'
+);
+
+cmp_excel(
+    catfile('t', 'got-0.xls'),
+    catfile('t', 'got-0.xls'),
+    {},
+    'Our Excels were essentially the same.'
 );
 
 cmp_excel(
@@ -21,7 +29,8 @@ cmp_excel(
       sheet           => 'MySheet1|MySheet2',
       tolerance       => 10**-12,
       sheet_tolerance => 0.20,
-      message         => 'OK'}
+    },
+    'OK'
 );
 
 cmp_excel(

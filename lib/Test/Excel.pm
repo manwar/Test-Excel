@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.29';
+$Test::Excel::VERSION   = '1.30';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.29
+Version 1.30
 
 =cut
 
@@ -29,7 +29,7 @@ our @EXPORT = qw(cmp_excel compare_excel);
 
 $|=1;
 
-my $DEBUG                = 0;
+my $DEBUG                = 1;
 my $ALMOST_ZERO          = 10**-16;
 my $IGNORE               = 1;
 my $SPECIAL_CASE         = 2;
@@ -85,7 +85,7 @@ likely support font and image comparisons, but not in this initial release.
 
 =head1 METHODS
 
-=head2 cmp_excel($got, $exp, { ...rule... })
+=head2 cmp_excel($got, $exp, \%rule, $message)
 
 This function will tell you whether the two Excel files are "visually" different,
 ignoring  differences  in  embedded fonts/images and metadata. Both $got and $exp
@@ -97,25 +97,25 @@ MODE.
     use Test::More no_plan => 1;
     use Test::Excel;
 
-    cmp_excel('foo.xls', 'bar.xls', { message => 'EXCELSs are identical.' });
+    cmp_excel('foo.xls', 'bar.xls', {}, 'EXCELs are identical.');
 
     # or
 
     my $foo = Spreadsheet::ParseExcel::Workbook->Parse('foo.xls');
     my $bar = Spreadsheet::ParseExcel::Workbook->Parse('bar.xls');
-    cmp_excel($foo, $bar, { message => 'EXCELs are identical.' });
+    cmp_excel($foo, $bar, {}, 'EXCELs are identical.');
 
 =cut
 
 sub cmp_excel {
-    my ($got, $exp, $rule) = @_;
+    my ($got, $exp, $rule, $message) = @_;
 
-    _validate_rule($rule);
-    $rule->{test} = 1;
-    compare_excel($got, $exp, $rule);
+    my $TESTER = Test::Builder->new;
+    my $status = compare_excel($got, $exp, $rule);
+    $TESTER->ok($status, $message);
 }
 
-=head2 compare_excel($got, $exp, { ...rule... })
+=head2 compare_excel($got, $exp, \%rule)
 
 This function will tell you whether the two Excel files are "visually" different,
 ignoring differences in  embedded fonts/images and metadata. Both  $got and  $exp
@@ -126,17 +126,17 @@ STANDALONE MODE.
     use strict; use warnings;
     use Test::Excel;
 
-    print "EXCELs are identical.\n"
-    if compare_excel("foo.xls", "bar.xls");
+    print "EXCELs are identical.\n" if compare_excel("foo.xls", "bar.xls");
 
 =cut
 
 sub compare_excel {
     my ($got, $exp, $rule) = @_;
 
-    die("ERROR: Unable to locate file [$got].\n") unless (-f $got);
-    die("ERROR: Unable to locate file [$exp].\n") unless (-f $exp);
-    _log_message("INFO: Excel comparison [$got] [$exp]\n") if $DEBUG;
+    die("ERROR: Unable to locate file [$got][$!].\n") unless (-f $got);
+    die("ERROR: Unable to locate file [$exp][$!].\n") unless (-f $exp);
+
+    _log_message("INFO: Excel comparison [$got] [$exp]\n");
 
     unless (blessed($got) && $got->isa('Spreadsheet::ParseExcel::WorkBook')) {
         $got = Spreadsheet::ParseExcel::Workbook->Parse($got)
@@ -148,97 +148,64 @@ sub compare_excel {
             || die("ERROR: Couldn't create Spreadsheet::ParseExcel::WorkBook instance with: [$exp]\n");
     }
 
-    my (@gotWorkSheets, @expWorkSheets);
-    my ($message, $status, $error, $error_limit, $spec, $test, $TESTER);
+    _validate_rule($rule);
 
-    $status = 1;
-    $test = $rule->{test}                if ((ref($rule) eq 'HASH') && exists($rule->{test}));
-    _validate_rule($rule)                unless (defined($test) && ($test));
-    $spec = parse($rule->{spec})         if exists($rule->{spec});
-    $error_limit = $rule->{error_limit}  if exists($rule->{error_limit});
-    $message     = $rule->{message}      if exists($rule->{message});
+    my $spec          = _get_hashval($rule, 'spec');
+    my $error_limit   = _get_hashval($rule, 'error_limit');
+    my $sheet         = _get_hashval($rule, 'sheet');
+    my @gotWorkSheets = $got->worksheets();
+    my @expWorkSheets = $exp->worksheets();
+
+    $spec        = _parse($spec)         if     defined $spec;
     $error_limit = $MAX_ERRORS_PER_SHEET unless defined $error_limit;
 
-    @gotWorkSheets = $got->worksheets();
-    @expWorkSheets = $exp->worksheets();
-
-    $TESTER = Test::Builder->new if (defined($test) && ($test));
     if (scalar(@gotWorkSheets) != scalar(@expWorkSheets)) {
-        $error = "ERROR: Sheets count mismatch. ";
-        $error .= "Got: [".scalar(@gotWorkSheets)."] exp: [".scalar(@expWorkSheets)."]\n";
-        _log_message($error);
-        if (defined($test) && ($test)) {
-            $TESTER->ok(0, $message);
-            return;
-        }
-        return 0;
+        my $error = "ERROR: Sheets count mismatch. ";
+        $error   .= "Got: [".scalar(@gotWorkSheets)."] exp: [".scalar(@expWorkSheets)."]\n";
+        _log_message($error) && return 0;
     }
 
-    my ($i, @sheets);
-    @sheets = split(/\|/,$rule->{sheet})
-        if (exists($rule->{sheet}) && defined($rule->{sheet}));
+    my @sheets;
+    my $status = 1;
+    @sheets = split(/\|/, $sheet) if defined $sheet;
 
-    for ($i=0; $i<scalar(@gotWorkSheets); $i++) {
-        my ($error_on_sheet);
-        my ($gotWorkSheet, $expWorkSheet);
-        my ($gotSheetName, $expSheetName);
-        my ($gotRowMin, $gotRowMax, $gotColMin, $gotColMax);
-        my ($expRowMin, $expRowMax, $expColMin, $expColMax);
+    for (my $i = 0; $i < scalar(@gotWorkSheets); $i++) {
+        my $error_on_sheet = 0;
+        my $gotWorkSheet   = $gotWorkSheets[$i];
+        my $expWorkSheet   = $expWorkSheets[$i];
+        my $gotSheetName   = $gotWorkSheet->get_name();
+        my $expSheetName   = $expWorkSheet->get_name();
 
-        $error_on_sheet = 0;
-        $gotWorkSheet   = $gotWorkSheets[$i];
-        $expWorkSheet   = $expWorkSheets[$i];
-        $gotSheetName   = $gotWorkSheet->get_name();
-        $expSheetName   = $expWorkSheet->get_name();
         if (uc($gotSheetName) ne uc($expSheetName)) {
-            $error = "ERROR: Sheetname mismatch. Got: [$gotSheetName] exp: [$expSheetName].\n";
-            _log_message($error);
-            if (defined($test) && ($test)) {
-                $TESTER->ok(0, $message);
-                return;
-            }
-            return 0;
+            my $error = "ERROR: Sheetname mismatch. Got: [$gotSheetName] exp: [$expSheetName].\n";
+            _log_message($error) && return 0;
         }
 
-        ($gotRowMin, $gotRowMax) = $gotWorkSheet->row_range();
-        ($gotColMin, $gotColMax) = $gotWorkSheet->col_range();
-        ($expRowMin, $expRowMax) = $expWorkSheet->row_range();
-        ($expColMin, $expColMax) = $expWorkSheet->col_range();
+        my ($gotRowMin, $gotRowMax) = $gotWorkSheet->row_range();
+        my ($gotColMin, $gotColMax) = $gotWorkSheet->col_range();
+        my ($expRowMin, $expRowMax) = $expWorkSheet->row_range();
+        my ($expColMin, $expColMax) = $expWorkSheet->col_range();
 
-        if ($DEBUG > 1) {
-            _log_message("\n");
-            _log_message("INFO:[$gotSheetName]:[$gotRowMin][$gotColMin]:[$gotRowMax][$gotColMax]");
-            _log_message("INFO:[$expSheetName]:[$expRowMin][$expColMin]:[$expRowMax][$expColMax]");
-        }
+        _log_message("INFO: [$gotSheetName]:[$gotRowMin][$gotColMin]:[$gotRowMax][$gotColMax]\n");
+        _log_message("INFO: [$expSheetName]:[$expRowMin][$expColMin]:[$expRowMax][$expColMax]\n");
 
         if (defined($gotRowMax) && defined($expRowMax) && ($gotRowMax != $expRowMax)) {
-            $error  = "\nERROR: Max row counts mismatch in sheet [$gotSheetName]. ";
-            $error .= "Got[$gotRowMax] Expected: [$expRowMax]\n";
-            _log_message($error);
-            if (defined($test) && ($test)) {
-                $TESTER->ok(0, $message);
-                return;
-            }
-            return 0;
+            my $error = "ERROR: Max row counts mismatch in sheet [$gotSheetName]. ";
+            $error   .= "Got[$gotRowMax] Expected: [$expRowMax]\n";
+            _log_message($error) && return 0;
         }
 
         if (defined($gotColMax) &&  defined($expColMax) && ($gotColMax != $expColMax)) {
-            $error  = "\nERROR: Max column counts mismatch in sheet [$gotSheetName]. ";
-            $error .= "Got[$gotColMax] Expected: [$expColMax]\n";
-            _log_message($error);
-            if (defined($test) && ($test)) {
-                $TESTER->ok(0, $message);
-                return;
-            }
-            return 0;
+            my $error = "ERROR: Max column counts mismatch in sheet [$gotSheetName]. ";
+            $error   .= "Got[$gotColMax] Expected: [$expColMax]\n";
+            _log_message($error) && return 0;
         }
 
-        my ($row, $col, $swap);
-        for ($row=$gotRowMin; $row<=$gotRowMax; $row++) {
-            for ($col=$gotColMin; $col<=$gotColMax; $col++) {
-                my ($gotData, $expData, $error);
-                $gotData = $gotWorkSheet->{Cells}[$row][$col]->{Val};
-                $expData = $expWorkSheet->{Cells}[$row][$col]->{Val};
+        my ($swap);
+        for (my $row = $gotRowMin; $row <= $gotRowMax; $row++) {
+            for (my $col = $gotColMin; $col <= $gotColMax; $col++) {
+                my $gotData = $gotWorkSheet->{Cells}[$row][$col]->{Val};
+                my $expData = $expWorkSheet->{Cells}[$row][$col]->{Val};
 
                 next if ( defined($spec)
                           && exists($spec->{uc($gotSheetName)}->{$col+1}->{$row+1})
@@ -252,139 +219,181 @@ sub compare_excel {
                             next;
                         }
                         else {
-                            if (defined($rule)) {
-                                my ($compare_with, $difference);
-                                $difference = abs($expData - $gotData) / abs($expData);
+                            if (defined $rule && scalar(keys %$rule)) {
+                                my $compare_with;
+                                my $difference = abs($expData - $gotData) / abs($expData);
 
                                 if ( ( defined($spec)
                                        && exists($spec->{uc($gotSheetName)}->{$col+1}->{$row+1})
                                        && ($spec->{uc($gotSheetName)}->{$col+1}->{$row+1} == $SPECIAL_CASE)
-                                     )
-                                     ||
-                                     ( scalar(@sheets) && grep(/$gotSheetName/,@sheets) ) ) {
-                                    print "\nINFO: [NUMBER]:[$gotSheetName]:[SPC][".($row+1)."][".($col+1)."]:[$gotData][$expData] ... "
-                                        if $DEBUG > 1;
+                                     ) || (scalar(@sheets) && grep(/$gotSheetName/,@sheets) )) {
+
+                                    _log_message("INFO: [NUMBER]:[$gotSheetName]:[SPC][".
+                                                 ($row+1)."][".($col+1)."]:[$gotData][$expData] ... ");
                                     $compare_with = $rule->{sheet_tolerance};
                                 }
                                 else {
-                                    print "\nINFO: [NUMBER]:[$gotSheetName]:[STD][".($row+1)."][".($col+1)."]:[$gotData][$expData] ... "
-                                        if $DEBUG > 1;
+                                    _log_message("INFO: [NUMBER]:[$gotSheetName]:[STD][".(
+                                                     $row+1)."][".($col+1)."]:[$gotData][$expData] ... ");
                                     $compare_with = $rule->{tolerance};
                                 }
 
-                                if ($compare_with < $difference) {
-                                    print "[FAIL]" if $DEBUG > 1;
+                                if (defined $compare_with && ($compare_with < $difference)) {
+                                    _log_message("[FAIL]\n");
                                     $difference = sprintf("%02f", $difference);
                                     $status = 0;
                                 }
                                 else {
                                     $status = 1;
-                                    print "[PASS]" if $DEBUG > 1;
+                                    _log_message("[PASS]\n");
                                 }
                             }
                             else {
-                                print "\nINFO: [NUMBER]:[$gotSheetName]:[N/A][".($row+1)."][".($col+1)."]:[$gotData][$expData] ... "
-                                    if $DEBUG > 1;
+                                _log_message("INFO: [NUMBER]:[$gotSheetName]:[N/A][".
+                                             ($row+1)."][".($col+1)."]:[$gotData][$expData] ... ");
                                 if ($expData != $gotData) {
-                                    print "[FAIL]" if $DEBUG > 1;
-                                    $status = 0;
+                                    _log_message("[FAIL]\n") && return 0;
                                 }
                                 else {
                                     $status = 1;
-                                    print "[PASS]" if $DEBUG > 1;
+                                    _log_message("[PASS]\n");
                                 }
                             }
                         }
                     }
                     else {
                         if (uc($gotData) ne uc($expData)) {
-                            _log_message("INFO: [STRING]:[$gotSheetName]:[$expData][$gotData] ... [FAIL]");
-                            $status = 0;
+                            _log_message("INFO: [STRING]:[$gotSheetName]:[$expData][$gotData] ... [FAIL]\n");
+                            if (defined $rule) {
+                                $error_on_sheet++;
+                                $status = 0;
+                            }
+                            else {
+                                return 0;
+                            }
                         }
                         else {
                             $status = 1;
-                            _log_message("INFO: [STRING]:[$gotSheetName]:[STD][".($row+1)."][".($col+1)."]:[$gotData][$expData] ... [PASS]")
-                                if $DEBUG > 1;
+                            _log_message("INFO: [STRING]:[$gotSheetName]:[STD][".
+                                         ($row+1)."][".($col+1)."]:[$gotData][$expData] ... [PASS]\n");
                         }
                     }
 
-                    if (exists($rule->{swap_check}) && defined($rule->{swap_check}) && ($rule->{swap_check})) {
+                    if ((exists $rule->{swap_check})
+                        && defined($rule->{swap_check}) && ($rule->{swap_check})) {
                         if ($status == 0) {
                             $error_on_sheet++;
-                            push @{$swap->{exp}->{number_to_letter($col-1)}}, $expData;
-                            push @{$swap->{got}->{number_to_letter($col-1)}}, $gotData;
+                            push @{$swap->{exp}->{_number_to_letter($col-1)}}, $expData;
+                            push @{$swap->{got}->{_number_to_letter($col-1)}}, $gotData;
 
                             if (($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
-                                _log_message("ERROR: Max error per sheet reached.[$error_on_sheet]\n");
-                                if (defined($test) && ($test)) {
-                                    $TESTER->ok($status, $message);
-                                    return;
-                                }
-                                return $status;
+                                _log_message("ERROR: Max error per sheet reached.[$error_on_sheet]\n")
+                                    && return $status;
                             }
                         }
+                    }
+                    else {
+                        ($status == 0) && return $status;
                     }
                 }
             } # col
 
-            if (($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
-                if (defined($test) && ($test)) {
-                    $TESTER->ok($status, $message);
-                    return;
-                }
-                return $status;
+            if (($error_on_sheet > 0) && ($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
+                ($status == 0) && return $status;
             }
-
         } # row
 
         if (exists($rule->{swap_check}) && defined($rule->{swap_check}) && ($rule->{swap_check})) {
             if (($error_on_sheet > 0) && _is_swapping($swap)) {
-                print "\n\nWARN: SWAP OCCURRED.\n\n";
+                _log_message("WARN: SWAP OCCURRED.\n");
                 $status = 1;
             }
         }
-        print "INFO: [$gotSheetName]: ..... [OK].\n" if $DEBUG == 1;
+
+        _log_message("INFO: [$gotSheetName]: ..... [OK].\n");
     } # sheet
-
-
-    if (defined($test) && ($test)) {
-        $TESTER->ok($status, $message);
-        return;
-    }
 
     return $status;
 }
 
-sub parse {
+#
+#
+# PRIVATE METHODS
+
+sub _column_row {
+    my ($cell) = @_;
+
+    return unless defined $cell;
+
+    die("ERROR: Invalid cell address [$cell].\n") unless ($cell =~ /([A-Za-z]+)(\d+)/);
+
+    return ($1, $2);
+}
+
+sub _letter_to_number {
+    my ($letter) = @_;
+
+    return col2int($letter);
+}
+
+sub _number_to_letter {
+    my ($number) = @_;
+
+    return int2col($number);
+}
+
+sub _cells_within_range {
+    my ($range) = @_;
+
+    return unless defined $range;
+
+    die("ERROR: Invalid range [$range].\n") unless ($range =~ /(\w+\d+):(\w+\d+)/);
+
+    my $from = $1;
+    my $to   = $2;
+    my ($min_col, $min_row) = Test::Excel::_column_row($from);
+    my ($max_col, $max_row) = Test::Excel::_column_row($to);
+
+    $min_col = Test::Excel::_letter_to_number($min_col);
+    $max_col = Test::Excel::_letter_to_number($max_col);
+
+    my $cells = [];
+    for (my $row = $min_row; $row <= $max_row; $row++) {
+        for (my $col = $min_col; $col <= $max_col; $col++) {
+            push @{$cells}, { col => $col, row => $row };
+        }
+    }
+
+    return $cells;
+}
+
+sub _parse {
     my ($spec) = @_;
 
     return unless defined $spec;
 
-    die("ERROR: Unable to locate spec file [$spec].\n")
-        unless (-f $spec);
+    die("ERROR: Unable to locate spec file [$spec][$!].\n") unless (-f $spec);
 
-    my ($handle, $row, $sheet, $cells, $data);
-    $handle = IO::File->new($spec)
-        || croak("ERROR: Couldn't open file [$spec][$!].\n");
+    my $data   = undef;
+    my $sheet  = undef;
+    my $handle = IO::File->new($spec) || die("ERROR: Couldn't open file [$spec][$!].\n");
 
-    $sheet = undef;
-    $data  = undef;
-    while ($row = <$handle>) {
+    while (my $row = <$handle>) {
         chomp($row);
-        next unless $row =~ /\w/;
-        next if $row =~ /^#/;
+        next unless ($row =~ /\w/);
+        next if     ($row =~ /^#/);
 
         if ($row =~ /^sheet\s+(.*)/i) {
             $sheet = $1;
         }
         elsif (defined($sheet) && ($row =~ /^range\s+(.*)/i)) {
-            $cells = Test::Excel::cells_within_range($1);
+            my $cells = Test::Excel::_cells_within_range($1);
             foreach (@{$cells}) {
                 $data->{uc($sheet)}->{$_->{col}+1}->{$_->{row}} = $SPECIAL_CASE;
             }
         }
         elsif (defined($sheet) && ($row =~ /^ignorerange\s+(.*)/i)) {
-            $cells = Test::Excel::cells_within_range($1);
+            my $cells = Test::Excel::_cells_within_range($1);
             foreach (@{$cells}) {
                 $data->{uc($sheet)}->{$_->{col}+1}->{$_->{row}} = $IGNORE;
             }
@@ -393,58 +402,20 @@ sub parse {
             die("ERROR: Invalid format data [$row] found in spec file.\n");
         }
     }
+
     $handle->close();
 
     return $data;
 }
 
-sub column_row {
-    my ($cell) = @_;
+sub _get_hashval {
+    my ($hash, $key) = @_;
 
-    return unless defined $cell;
+    return unless (defined $hash && defined $key);
+    die "_get_hashval(): Not a hash." unless (ref($hash) eq 'HASH');
 
-    die("ERROR: Invalid cell address [$cell].\n")
-        unless ($cell =~ /([A-Za-z]+)(\d+)/);
-
-    return ($1, $2);
-}
-
-sub letter_to_number {
-    my ($letter) = @_;
-
-    return col2int($letter);
-}
-
-sub number_to_letter {
-    my ($number) = @_;
-
-    return int2col($number);
-}
-
-sub cells_within_range {
-    my ($range) = @_;
-
-    return unless defined $range;
-
-    die("ERROR: Invalid range [$range].\n")
-        unless ($range =~ /(\w+\d+):(\w+\d+)/);
-
-    my ($from, $to, $row, $col, $cells);
-    my ($min_row, $min_col, $max_row, $max_col);
-
-    $from = $1; $to = $2;
-    ($min_col, $min_row) = column_row($from);
-    ($max_col, $max_row) = column_row($to);
-    $min_col = letter_to_number($min_col);
-    $max_col = letter_to_number($max_col);
-
-    for ($row = $min_row; $row <= $max_row; $row++) {
-        for ($col = $min_col; $col <= $max_col; $col++) {
-            push @{$cells}, { col => $col, row => $row };
-        }
-    }
-
-    return $cells;
+    return unless (exists $hash->{$key});
+    return $hash->{$key};
 }
 
 sub _is_swapping {
@@ -467,7 +438,7 @@ sub _log_message {
 
     return unless defined($message);
 
-    print {*STDOUT} "\n".$message;
+    print {*STDOUT} $message if ($DEBUG);
 }
 
 sub _validate_rule {
