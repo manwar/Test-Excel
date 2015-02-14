@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.31';
+$Test::Excel::VERSION   = '1.32';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.31
+Version 1.32
 
 =cut
 
@@ -47,20 +47,20 @@ can be used as standalone.
 The new paramter has been added to both method cmp_excel() & method compare_excel()
 called RULE. This is optional,however,this would allow to apply your own rule for
 comparison. This should  be passed in as reference to a HASH with the keys sheet,
-tolerance, sheet_tolerance and  optionally  swap_check,  error_limit  and message
-(only relevant to method cmp_excel()).
+tolerance, sheet_tolerance and  optionally  swap_check and error_limit.
 
-    +-----------------+---------------------------------------------------------------------+
-    | Key             | Description                                                         |
-    +-----------------+---------------------------------------------------------------------+
-    | sheet           | "|" seperated sheet names.                                          |
-    | tolerance       | Number. Apply to all NUMBERS except on 'sheet'/'spec'. e.g. 10**-12 |
-    | sheet_tolerance | Number. Apply to sheets/ranges in the spec. e.g. 0.20               |
-    | spec            | Path to the specification file.                                     |
-    | swap_check      | Number (optional) (1 or 0). Row swapping check. Default is 0.       |
-    | error_limit     | Number (optional). Limit error per sheet. Default is 0.             |
-    | message         | String (optional). Only required when calling method cmp_excel().   |
-    +-----------------+---------------------------------------------------------------------+
+    +-----------------+---------------------------------------------------------+
+    | Key             | Description                                             |
+    +-----------------+---------------------------------------------------------+
+    | sheet           | "|" seperated sheet names.                              |
+    | tolerance       | Number. Apply to all NUMBERS except on 'sheet'/'spec'.  |
+    |                 | e.g. 10**-12                                            |
+    | sheet_tolerance | Number. Apply to sheets/ranges in the spec. e.g. 0.20   |
+    | spec            | Path to the specification file.                         |
+    | swap_check      | Number (optional) (1 or 0). Row swapping check.         |
+    |                 | Default is 0.                                           |
+    | error_limit     | Number (optional). Limit error per sheet. Default is 0. |
+    +-----------------+---------------------------------------------------------+
 
 =head1 SPECIFICATION FILE
 

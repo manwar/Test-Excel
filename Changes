@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.32  Sat Feb 14 23:40:18 2015
+      - Tidied up pod document with regard to the change in interface.
+
 1.31  Sat Feb 14 23:05:18 2015
       - Made the DEBUG parameter as environment variable.
 
