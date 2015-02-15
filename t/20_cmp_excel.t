@@ -2,7 +2,7 @@
 
 use strict; use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use File::Spec::Functions;
 
 BEGIN { use_ok('Test::Excel'); }
@@ -14,11 +14,18 @@ cmp_excel(
     'Our Excels were essentially the same.'
 );
 
-cmp_excel(
+cmp_excel_ok(
     catfile('t', 'got-0.xls'),
     catfile('t', 'got-0.xls'),
     {},
     'Our Excels were essentially the same.'
+);
+
+cmp_excel_not_ok(
+    catfile('t', 'got-0.xls'),
+    catfile('t', 'exp-0.xls'),
+    {},
+    'Our Excels were NOT essentially the same.'
 );
 
 cmp_excel(

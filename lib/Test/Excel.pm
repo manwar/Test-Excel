@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.32';
+$Test::Excel::VERSION   = '1.33';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.32
+Version 1.33
 
 =cut
 
@@ -25,7 +25,7 @@ use Spreadsheet::ParseExcel::Utility qw(int2col col2int);
 
 require Exporter;
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(cmp_excel compare_excel);
+our @EXPORT = qw(cmp_excel compare_excel cmp_excel_ok cmp_excel_not_ok);
 
 $|=1;
 
@@ -33,6 +33,7 @@ my $ALMOST_ZERO          = 10**-16;
 my $IGNORE               = 1;
 my $SPECIAL_CASE         = 2;
 my $MAX_ERRORS_PER_SHEET = 0;
+my $TESTER               = Test::Builder->new;
 
 =head1 DESCRIPTION
 
@@ -104,14 +105,40 @@ MODE.
     my $bar = Spreadsheet::ParseExcel::Workbook->Parse('bar.xls');
     cmp_excel($foo, $bar, {}, 'EXCELs are identical.');
 
+=head2 cmp_excel_ok($got, $exp, \%rule, $message)
+
+Test OK if excel files are identical. Same as cmp_excel().
+
+=head2 cmp_excel_not_ok($got, $exp, \%rule, $message)
+
+Test OK if excel files are NOT identical.
+
 =cut
 
 sub cmp_excel {
     my ($got, $exp, $rule, $message) = @_;
 
-    my $TESTER = Test::Builder->new;
     my $status = compare_excel($got, $exp, $rule);
     $TESTER->ok($status, $message);
+}
+
+sub cmp_excel_ok {
+    my ($got, $exp, $rule, $message) = @_;
+
+    my $status = compare_excel($got, $exp, $rule);
+    $TESTER->ok($status, $message);
+}
+
+sub cmp_excel_not_ok {
+    my ($got, $exp, $rule, $message) = @_;
+
+    my $status = compare_excel($got, $exp, $rule);
+    if ($status == 0) {
+        $TESTER->ok(1, $message);
+    }
+    else {
+        $TESTER->ok(0, $message);
+    }
 }
 
 =head2 compare_excel($got, $exp, \%rule)
