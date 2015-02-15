@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.34  Sun Feb 15 02:10:00 2015
+      - Tidied up pod document to reflect the current state of the code.
+
 1.33  Sun Feb 15 00:15:00 2015
       - Added 2 new methods cmp_excel_ok() and cmp_excel_not_ok().
       - Updated test script to reflect the above changes.

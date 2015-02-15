@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.33';
+$Test::Excel::VERSION   = '1.34';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.33
+Version 1.34
 
 =cut
 
@@ -38,17 +38,13 @@ my $TESTER               = Test::Builder->new;
 =head1 DESCRIPTION
 
 This  module is meant to be used for testing  custom  generated  Excel  files, it
-provides two functions at the moment, which is C<cmp_excel> and C<compare_excel>.
-These can be used to compare_excel 2  Excel files to see  if they are I<visually>
-similar. The function C<cmp_excel> is for testing purpose where function C<compare_excel>
-can be used as standalone.
+provides interfaces to compare_excel two Excel files if they are I<visually> same.
 
 =head1 RULE
 
-The new paramter has been added to both method cmp_excel() & method compare_excel()
-called RULE. This is optional,however,this would allow to apply your own rule for
-comparison. This should  be passed in as reference to a HASH with the keys sheet,
-tolerance, sheet_tolerance and  optionally  swap_check and error_limit.
+The paramter C<rule> can be used optionally to apply exception when comparing the
+contents. This should be passed in as has ref and may contain keys from the table
+below.
 
     +-----------------+---------------------------------------------------------+
     | Key             | Description                                             |
@@ -77,11 +73,11 @@ values are space seperated.
 
 =head1 What is "Visually" Similar?
 
-This module uses the C<Spreadsheet::ParseExcel> module to parse Excel files, then
-compares the parsed  data structure for differences. We ignore cetain  components
+This module uses the L<Spreadsheet::ParseExcel> module to parse Excel files, then
+compares the parsed  data structure for differences.We ignore certain  components
 of the Excel file, such as embedded fonts,  images,  forms and  annotations,  and
 focus  entirely  on  the layout of each Excel page instead.  Future versions will
-likely support font and image comparisons, but not in this initial release.
+likely support font and image comparisons.
 
 =head1 METHODS
 
@@ -144,10 +140,9 @@ sub cmp_excel_not_ok {
 =head2 compare_excel($got, $exp, \%rule)
 
 This function will tell you whether the two Excel files are "visually" different,
-ignoring differences in  embedded fonts/images and metadata. Both  $got and  $exp
-can be either instances of Spreadsheet::ParseExcel / file path (which  is in turn
-passed   to   the   Spreadsheet::ParseExcel constructor).  This one is for use in
-STANDALONE MODE.
+ignoring  differences  in  embedded fonts/images and  metadata. Both  C<$got> and
+C<$exp> can be either instances of Spreadsheet::ParseExcel / file path (which  in
+turn passed to the Spreadsheet::ParseExcel constructor).
 
     use strict; use warnings;
     use Test::Excel;
@@ -521,10 +516,10 @@ sub _validate_rule {
 
 It should be clearly noted that this module does not claim to provide  fool-proof
 comparison of generated Excels. In fact there are still a number of ways in which
-I want to expand the existing comparison functionality.This module I<is> actively
-being developed for a number of projects  I  am  currently  working on, so expect
-many  changes  to happen. If you have any suggestions/comments/questions   please
-feel free to contact me.
+I want to expand the existing comparison functionality. This module  is no longer
+ actively being developed as I moved to another company.This work was part of one
+of my project. Having said, I would be more than happy to add new features if its
+requested. Any suggestions / ideas most welcome.
 
 =head1 CAVEATS
 
@@ -535,15 +530,15 @@ obvious reasons.
 
 =head1 BUGS
 
-None  that I am aware of. Of course, if you find a bug, let me know, and I will be
-sure to fix it.  This is still a very early version, so it is always possible that
-I have just "gotten it wrong" in some places.
+None that I am aware of.Of course, if you find a bug, let me know, and I would do
+my best  to fix it.  This is still a very early version, so it is always possible
+that I have just "gotten it wrong" in some places.
 
 =head1 SEE ALSO
 
 =over 4
 
-=item C<Spreadsheet::ParseExcel>  -  I  could  not have written this without this
+=item L<Spreadsheet::ParseExcel>  -  I  could  not have written this without this
 module.
 
 =back
@@ -607,8 +602,8 @@ L<http://search.cpan.org/dist/Test-Excel/>
 
 Copyright (C) 2010 - 2015 Mohammad S Anwar.
 
-This  program  is  free software; you can redistribute it and/or modify it under
-the  terms  of the the Artistic License (2.0). You may obtain a copy of the full
+This  program  is  free software; you can redistribute it  and/or modify it under
+the  terms  of the the Artistic License (2.0). You may  obtain a copy of the full
 license at:
 
 L<http://www.perlfoundation.org/artistic_license_2_0>
@@ -643,4 +638,4 @@ OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Test-Excel
+1; # End of Test::Excel
