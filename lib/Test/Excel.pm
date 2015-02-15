@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.34';
+$Test::Excel::VERSION   = '1.35';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.34
+Version 1.35
 
 =cut
 
@@ -40,44 +40,31 @@ my $TESTER               = Test::Builder->new;
 This  module is meant to be used for testing  custom  generated  Excel  files, it
 provides interfaces to compare_excel two Excel files if they are I<visually> same.
 
-=head1 RULE
+=head1 SYNOPSIS
 
-The paramter C<rule> can be used optionally to apply exception when comparing the
-contents. This should be passed in as has ref and may contain keys from the table
-below.
+Using as unit test as below:
 
-    +-----------------+---------------------------------------------------------+
-    | Key             | Description                                             |
-    +-----------------+---------------------------------------------------------+
-    | sheet           | "|" seperated sheet names.                              |
-    | tolerance       | Number. Apply to all NUMBERS except on 'sheet'/'spec'.  |
-    |                 | e.g. 10**-12                                            |
-    | sheet_tolerance | Number. Apply to sheets/ranges in the spec. e.g. 0.20   |
-    | spec            | Path to the specification file.                         |
-    | swap_check      | Number (optional) (1 or 0). Row swapping check.         |
-    |                 | Default is 0.                                           |
-    | error_limit     | Number (optional). Limit error per sheet. Default is 0. |
-    +-----------------+---------------------------------------------------------+
+    use strict; use warnings;
+    use Test::More tests => 2;
+    use Test::Excel;
 
-=head1 SPECIFICATION FILE
+    cmp_excel_ok("1.xls", "1.xls");
 
-Spec  file containing rules used should be in the format mentioned below. Key and
-values are space seperated.
+    cmp_excel_not_ok("1.xls", "2.xls");
 
-    sheet       Sheet1
-    range       A3:B14
-    range       B5:C5
-    sheet       Sheet2
-    range       A1:B2
-    ignorerange B3:B8
+    done_testing();
 
-=head1 What is "Visually" Similar?
+Using as standalone as below:
 
-This module uses the L<Spreadsheet::ParseExcel> module to parse Excel files, then
-compares the parsed  data structure for differences.We ignore certain  components
-of the Excel file, such as embedded fonts,  images,  forms and  annotations,  and
-focus  entirely  on  the layout of each Excel page instead.  Future versions will
-likely support font and image comparisons.
+    use strict; use warnings;
+    use Test::Excel;
+
+    if (compare_excel("1.xls", "1.xls")) {
+        print "Excels are similar.\n";
+    }
+    else {
+        print "Excels aren't similar.\n";
+    }
 
 =head1 METHODS
 
@@ -153,6 +140,11 @@ turn passed to the Spreadsheet::ParseExcel constructor).
 
 sub compare_excel {
     my ($got, $exp, $rule) = @_;
+
+    local $SIG{__WARN__} = sub {
+        my ($error) = @_;
+        warn $error unless ($error =~ /Use of uninitialized value/);
+    };
 
     die("ERROR: Unable to locate file [$got][$!].\n") unless (-f $got);
     die("ERROR: Unable to locate file [$exp][$!].\n") unless (-f $exp);
@@ -341,6 +333,53 @@ sub compare_excel {
 
     return $status;
 }
+
+=head1 RULE
+
+The paramter C<rule> can be used optionally to apply exception when comparing the
+contents. This should be passed in as has ref and may contain keys from the table
+below.
+
+    +-----------------+---------------------------------------------------------+
+    | Key             | Description                                             |
+    +-----------------+---------------------------------------------------------+
+    | sheet           | "|" seperated sheet names.                              |
+    | tolerance       | Number. Apply to all NUMBERS except on 'sheet'/'spec'.  |
+    |                 | e.g. 10**-12                                            |
+    | sheet_tolerance | Number. Apply to sheets/ranges in the spec. e.g. 0.20   |
+    | spec            | Path to the specification file.                         |
+    | swap_check      | Number (optional) (1 or 0). Row swapping check.         |
+    |                 | Default is 0.                                           |
+    | error_limit     | Number (optional). Limit error per sheet. Default is 0. |
+    +-----------------+---------------------------------------------------------+
+
+=head1 SPECIFICATION FILE
+
+Spec  file containing rules used should be in the format mentioned below. Key and
+values are space seperated.
+
+    sheet       Sheet1
+    range       A3:B14
+    range       B5:C5
+    sheet       Sheet2
+    range       A1:B2
+    ignorerange B3:B8
+
+=head1 What is "Visually" Similar?
+
+This module uses the L<Spreadsheet::ParseExcel> module to parse Excel files, then
+compares the parsed  data structure for differences.We ignore certain  components
+of the Excel file, such as embedded fonts,  images,  forms and  annotations,  and
+focus  entirely  on  the layout of each Excel page instead.  Future versions will
+likely support font and image comparisons.
+
+=head1 How to find out what failed the comparison?
+
+By turning the environment variable DEBUG ON would spit out PASS/FAIL comparison.
+
+e.g. $/> $DEBUG=1 perl your_script.pl
+
+=cut
 
 #
 #
