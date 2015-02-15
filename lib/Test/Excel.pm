@@ -77,16 +77,12 @@ passed to the Spreadsheet::ParseExcel constructor). This one  is for use in  TES
 MODE.
 
     use strict; use warnings;
-    use Test::More no_plan => 1;
+    use Test::More tests => 1;
     use Test::Excel;
 
     cmp_excel('foo.xls', 'bar.xls', {}, 'EXCELs are identical.');
 
-    # or
-
-    my $foo = Spreadsheet::ParseExcel::Workbook->Parse('foo.xls');
-    my $bar = Spreadsheet::ParseExcel::Workbook->Parse('bar.xls');
-    cmp_excel($foo, $bar, {}, 'EXCELs are identical.');
+    done_testing();
 
 =head2 cmp_excel_ok($got, $exp, \%rule, $message)
 
