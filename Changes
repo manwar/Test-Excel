@@ -1,5 +1,11 @@
 Revision history for Perl extension Test::Excel.
 
+1.37  Tue Feb 17 11:20:00 2015
+      - Removed BOM from the following test scripts:
+        - t/30_compare_excel.t
+        - t/40_unit_test.t
+        - t/50_spec_test.t
+
 1.36  Sun Feb 15 10:50:00 2015
       - Fixed the code in the pod document.
 
