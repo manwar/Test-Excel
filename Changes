@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.38  Sat Aug 06 20:00:00 2016
+      - Updated Copyright year information.
+
 1.37  Tue Feb 17 11:20:00 2015
       - Removed BOM from the following test scripts:
         - t/30_compare_excel.t
