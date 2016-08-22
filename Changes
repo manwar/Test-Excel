@@ -1,5 +1,10 @@
 Revision history for Perl extension Test::Excel.
 
+1.39  Mon Aug 22 10:45:00 2016
+      - Added unit test script t/00-load.t
+      - Tidied up unit test scripts (t/meta-json.t and t/meta-yml.t).
+      - Updated copyright year information in the README file.
+
 1.38  Sat Aug 06 20:00:00 2016
       - Updated Copyright year information.
 

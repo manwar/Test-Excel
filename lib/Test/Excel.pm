@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.38';
+$Test::Excel::VERSION   = '1.39';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files.
 
 =head1 VERSION
 
-Version 1.38
+Version 1.39
 
 =cut
 

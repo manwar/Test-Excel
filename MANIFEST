@@ -5,6 +5,7 @@ MANIFEST
 MANIFEST.SKIP
 README
 lib/Test/Excel.pm
+t/00-load.t
 t/10_Test-Excel_test.t
 t/20_cmp_excel.t
 t/30_compare_excel.t
