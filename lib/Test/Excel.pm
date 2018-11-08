@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.42';
+$Test::Excel::VERSION   = '1.43';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files (.xls/.xlsx).
 
 =head1 VERSION
 
-Version 1.42
+Version 1.43
 
 =cut
 
@@ -620,11 +620,11 @@ that I have just "gotten it wrong" in some places.
 
 =over 4
 
-=item H.Merijn Brand (author of Spreadsheet::Read).
+=item H.Merijn Brand (author of L<Spreadsheet::Read>).
 
-=item Kawai Takanori (author of Spreadsheet::ParseExcel::Utility).
+=item Kawai Takanori (author of L<Spreadsheet::ParseExcel::Utility>).
 
-=item Stevan Little  (author of Test::PDF).
+=item Stevan Little  (author of L<Test::PDF>).
 
 =back
 
