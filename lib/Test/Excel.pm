@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.43';
+$Test::Excel::VERSION   = '1.44';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files (.xls/.xlsx).
 
 =head1 VERSION
 
-Version 1.43
+Version 1.44
 
 =cut
 
@@ -73,7 +73,7 @@ Using as standalone as below:
 This function will tell you whether the two Excel files are "visually" different,
 ignoring  differences  in  embedded fonts/images and metadata. Both $got and $exp
 can be either instances of Spreadsheet::Read / file path (which is in turn passed
-passed to the Spreadsheet::Read constructor). This one  is for use in  TEST MODE.
+to the L<Spreadsheet::Read> constructor). This one is for use in TEST MODE.
 
     use strict; use warnings;
     use Test::More tests => 1;
@@ -123,8 +123,8 @@ sub cmp_excel_not_ok {
 
 This function will tell you whether the two Excel files are "visually" different,
 ignoring  differences  in  embedded fonts/images and  metadata. Both  C<$got> and
-C<$exp> can be either instances of Spreadsheet::Read / file  path (which  in turn
-passed to the Spreadsheet::Read constructor).
+C<$exp> can be either instances of L<Spreadsheet::Read>/file path (which  in turn
+passed to the L<Spreadsheet::Read> constructor).
 
     use strict; use warnings;
     use Test::Excel;
@@ -217,8 +217,6 @@ sub compare_excel {
         my ($swap);
         for (my $row = $gotRowMin; $row <= $gotRowMax; $row++) {
             for (my $col = $gotColMin; $col <= $gotColMax; $col++) {
-                #my $gotData = $gotWorkSheet->{Cells}[$row][$col]->{Val};
-                #my $expData = $expWorkSheet->{Cells}[$row][$col]->{Val};
                 my $gotData = $got_sheet->cell($col, $row);
                 my $expData = $exp_sheet->cell($col, $row);
 
@@ -296,13 +294,16 @@ sub compare_excel {
                     }
 
                     if ((exists $rule->{swap_check})
-                        && defined($rule->{swap_check}) && ($rule->{swap_check})) {
+                        && defined($rule->{swap_check})
+                        && ($rule->{swap_check})) {
                         if ($status == 0) {
                             $error_on_sheet++;
                             push @{$swap->{exp}->{_number_to_letter($col)}}, $expData;
                             push @{$swap->{got}->{_number_to_letter($col)}}, $gotData;
 
-                            if (($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
+                            if (($error_on_sheet >= $error_limit)
+                                && ($error_on_sheet % 2 == 0)
+                                && !_is_swapping($swap)) {
                                 _log_message("ERROR: Max error per sheet reached.[$error_on_sheet]\n");
                                 return $status;
                             }
@@ -314,12 +315,17 @@ sub compare_excel {
                 }
             } # col
 
-            if (($error_on_sheet > 0) && ($error_on_sheet >= $error_limit) && ($error_on_sheet % 2 == 0) && !_is_swapping($swap)) {
+            if (($error_on_sheet > 0)
+                && ($error_on_sheet >= $error_limit)
+                && ($error_on_sheet % 2 == 0)
+                && !_is_swapping($swap)) {
                 return $status if ($status == 0);
             }
         } # row
 
-        if (exists($rule->{swap_check}) && defined($rule->{swap_check}) && ($rule->{swap_check})) {
+        if (exists($rule->{swap_check})
+            && defined($rule->{swap_check})
+            && ($rule->{swap_check})) {
             if (($error_on_sheet > 0) && _is_swapping($swap)) {
                 _log_message("WARN: SWAP OCCURRED.\n");
                 $status = 1;
