@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.45  Sat Nov 10 07:25:00 2018
+      - Minor cosmetic changes in the pod.
+
 1.44  Fri Nov 09 15:10:00 2018
       - Fixed typo in the pod.
       - General code clean up.

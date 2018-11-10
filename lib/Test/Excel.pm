@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.44';
+$Test::Excel::VERSION   = '1.45';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files (.xls/.xlsx).
 
 =head1 VERSION
 
-Version 1.44
+Version 1.45
 
 =cut
 
@@ -48,9 +48,9 @@ Using as unit test as below:
     use Test::More tests => 2;
     use Test::Excel;
 
-    cmp_excel_ok("1.xls", "1.xls");
+    cmp_excel_ok("foo.xls", "foo.xls");
 
-    cmp_excel_not_ok("1.xls", "2.xls");
+    cmp_excel_not_ok("foo.xls", "bar.xls");
 
     done_testing();
 
@@ -59,7 +59,7 @@ Using as standalone as below:
     use strict; use warnings;
     use Test::Excel;
 
-    if (compare_excel("1.xls", "1.xls")) {
+    if (compare_excel("foo.xls", "foo.xls")) {
         print "Excels are similar.\n";
     }
     else {
@@ -71,9 +71,10 @@ Using as standalone as below:
 =head2 cmp_excel($got, $exp, \%rule, $message)
 
 This function will tell you whether the two Excel files are "visually" different,
-ignoring  differences  in  embedded fonts/images and metadata. Both $got and $exp
-can be either instances of Spreadsheet::Read / file path (which is in turn passed
-to the L<Spreadsheet::Read> constructor). This one is for use in TEST MODE.
+ignoring differences  in  embedded  fonts / images and metadata.Both C<$got> and
+C<$exp>  can be either instance of L<Spreadsheet::Read> / file path (which is in
+turn passed to the L<Spreadsheet::Read> constructor).
+This one is for use in TEST MODE.
 
     use strict; use warnings;
     use Test::More tests => 1;
@@ -85,7 +86,7 @@ to the L<Spreadsheet::Read> constructor). This one is for use in TEST MODE.
 
 =head2 cmp_excel_ok($got, $exp, \%rule, $message)
 
-Test OK if excel files are identical. Same as cmp_excel().
+Test OK if excel files are identical. Same as C<cmp_excel()>.
 
 =head2 cmp_excel_not_ok($got, $exp, \%rule, $message)
 
@@ -121,10 +122,11 @@ sub cmp_excel_not_ok {
 
 =head2 compare_excel($got, $exp, \%rule)
 
+Same as C<cmp_excel_ok()> but ideal for non TEST MODE.
 This function will tell you whether the two Excel files are "visually" different,
-ignoring  differences  in  embedded fonts/images and  metadata. Both  C<$got> and
-C<$exp> can be either instances of L<Spreadsheet::Read>/file path (which  in turn
-passed to the L<Spreadsheet::Read> constructor).
+ignoring differences  in  embedded  fonts / images and metadata.Both C<$got> and
+C<$exp>  can be either instance of L<Spreadsheet::Read> / file path (which is in
+turn passed to the L<Spreadsheet::Read> constructor).
 
     use strict; use warnings;
     use Test::Excel;
@@ -380,8 +382,9 @@ likely support font and image comparisons.
 =head1 How to find out what failed the comparison?
 
 By turning the environment variable DEBUG ON would spit out PASS/FAIL comparison.
+For example:
 
-e.g. $ $DEBUG=1 perl your_script.pl
+    $/> $DEBUG=1 perl your-test-script.pl
 
 =cut
 
