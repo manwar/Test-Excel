@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.48  Tue Jun 01 14:35:00 2021
+      - Updated MANIFEST to include the new test data.
+
 1.47  Fri May 28 15:10:00 2021
       - Added ability to compare sheets ignoring given cell range.
 
