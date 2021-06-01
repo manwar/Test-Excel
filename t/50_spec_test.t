@@ -43,6 +43,12 @@ is(compare_excel(
     { spec => catfile('t', 'spec-4.txt') }
 ), 1);
 
+is(compare_excel(
+    catfile('t', 'got-10.xls'),
+    catfile('t', 'exp-10.xls'),
+    { spec => catfile('t', 'spec-4.txt') }
+), 0);
+
 eval
 {
     compare_excel(

@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.48';
+$Test::Excel::VERSION   = '1.49';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files (.xls/.xlsx).
 
 =head1 VERSION
 
-Version 1.48
+Version 1.49
 
 =cut
 
@@ -254,7 +254,7 @@ sub compare_excel {
                                 else {
                                     _log_message("INFO: [NUMBER]:[$gotSheetName]:[STD][".(
                                                      $row)."][".($col)."]:[$gotData][$expData] ... ");
-                                    $compare_with = $rule->{tolerance};
+                                    $compare_with = $rule->{tolerance} || 0;
                                 }
 
                                 if (defined $compare_with && ($compare_with < $difference)) {
