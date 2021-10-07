@@ -11,7 +11,7 @@ WriteMakefile(
     VERSION_FROM       => 'lib/Test/Excel.pm',
     ABSTRACT_FROM      => 'lib/Test/Excel.pm',
     LICENSE            => 'artistic_2',
-    MIN_PERL_VERSION   => 5.006,
+    MIN_PERL_VERSION   => 5.010,
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
     },
