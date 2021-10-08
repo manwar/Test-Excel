@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+NEXT
+      - Bumped minimum Perl version to 5.10 to satisfy dependencies.
+
 1.49  Tue Jun 01 16:55:00 2021
       - Fixed bug in ignoring common shell cell range.
 
