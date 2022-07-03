@@ -1,5 +1,8 @@
 Revision history for Perl extension Test::Excel.
 
+1.52  Sun Jul 03 17:10:00 2022
+      - Tidied up unit test.
+
 1.51  Sun Jul 03 15:00:00 2022
       - Added ability to support regex.
 
