@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.50';
+$Test::Excel::VERSION   = '1.51';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files (.xls/.xlsx).
 
 =head1 VERSION
 
-Version 1.50
+Version 1.51
 
 =cut
 
@@ -31,6 +31,7 @@ $|=1;
 my $ALMOST_ZERO          = 10**-16;
 my $IGNORE               = 1;
 my $SPECIAL_CASE         = 2;
+my $REGEX_CASE           = 3;
 my $MAX_ERRORS_PER_SHEET = 0;
 my $TESTER               = Test::Builder->new;
 
@@ -165,12 +166,13 @@ sub compare_excel {
     my @gotWorkSheets = $got->sheets();
     my @expWorkSheets = $exp->sheets();
 
-    $spec        = _parse($spec)         if     defined $spec;
-    $error_limit = $MAX_ERRORS_PER_SHEET unless defined $error_limit;
+    $spec             = _parse($spec)         if     defined $spec;
+    $error_limit      = $MAX_ERRORS_PER_SHEET unless defined $error_limit;
 
-    if (scalar(@gotWorkSheets) != scalar(@expWorkSheets)) {
-        my $error = "ERROR: Sheets count mismatch. ";
-        $error   .= "Got: [".scalar(@gotWorkSheets)."] exp: [".scalar(@expWorkSheets)."]\n";
+    if (@gotWorkSheets != @expWorkSheets) {
+        my $error = 'ERROR: Sheets count mismatch. ';
+        $error   .= 'Got: ['   . @gotWorkSheets .
+                    '] exp: [' . @expWorkSheets . "]\n";
         _log_message($error);
         return 0;
     }
@@ -179,7 +181,7 @@ sub compare_excel {
     my $status = 1;
     @sheets = split(/\|/, $sheet) if defined $sheet;
 
-    for (my $i = 0; $i < scalar(@gotWorkSheets); $i++) {
+    for (my $i = 0; $i < @gotWorkSheets; $i++) {
         my $error_on_sheet = 0;
         my $gotWorkSheet   = $gotWorkSheets[$i];
         my $expWorkSheet   = $expWorkSheets[$i];
@@ -196,10 +198,10 @@ sub compare_excel {
 
         my $got_sheet = $got->sheet($gotSheetName);
         my $exp_sheet = $exp->sheet($expSheetName);
-        my ($gotRowMin, $gotRowMax) = (0, $got_sheet->maxrow);
-        my ($gotColMin, $gotColMax) = (0, $got_sheet->maxcol);
-        my ($expRowMin, $expRowMax) = (0, $exp_sheet->maxrow);
-        my ($expColMin, $expColMax) = (0, $exp_sheet->maxcol);
+        my ($gotRowMin, $gotRowMax) = (1, $got_sheet->maxrow);
+        my ($gotColMin, $gotColMax) = (1, $got_sheet->maxcol);
+        my ($expRowMin, $expRowMax) = (1, $exp_sheet->maxrow);
+        my ($expColMin, $expColMax) = (1, $exp_sheet->maxcol);
 
         _log_message("INFO: [$gotSheetName]:[$gotRowMin][$gotColMin]:[$gotRowMax][$gotColMax]\n");
         _log_message("INFO: [$expSheetName]:[$expRowMin][$expColMin]:[$expRowMax][$expColMax]\n");
@@ -224,15 +226,28 @@ sub compare_excel {
                 my $gotData = $got_sheet->cell($col, $row);
                 my $expData = $exp_sheet->cell($col, $row);
 
-                next if (defined($spec)
-                         && (($spec->{ALL}->{$col}->{$row} == $IGNORE)
-                             ||
-                             (exists($spec->{uc($gotSheetName)}->{$col}->{$row})
-                              && $spec->{uc($gotSheetName)}->{$col}->{$row} == $IGNORE)));
+                next if (defined $spec
+                         &&
+                         ((   exists $spec->{ALL}
+                           && exists $spec->{ALL}->{$col}
+                           && exists $spec->{ALL}->{$col}->{$row}
+                           && exists $spec->{ALL}->{$col}->{$row}->{$IGNORE}
+                          )
+                          ||
+                          (   exists $spec->{uc($gotSheetName)}
+                           && exists $spec->{uc($gotSheetName)}->{$col}
+                           && exists $spec->{uc($gotSheetName)}->{$col}->{$row}
+                           && exists $spec->{uc($gotSheetName)}->{$col}->{$row}->{$IGNORE}
+                          ))
+                        );
 
-                if (defined($gotData) && defined($expData)) {
-                    if (($gotData =~ /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)
-                        && ($expData =~ /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)) {
+                if (defined $gotData && defined $expData) {
+                    # Number like data?
+                    if (
+                        ($gotData =~ /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)
+                        &&
+                        ($expData =~ /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/)
+                       ) {
                         if (($gotData < $ALMOST_ZERO) && ($expData < $ALMOST_ZERO)) {
                             # Can be treated as the same.
                             next;
@@ -242,10 +257,15 @@ sub compare_excel {
                                 my $compare_with;
                                 my $difference = abs($expData - $gotData) / abs($expData);
 
-                                if ( ( defined($spec)
-                                       && exists($spec->{uc($gotSheetName)}->{$col}->{$row})
-                                       && ($spec->{uc($gotSheetName)}->{$col}->{$row} == $SPECIAL_CASE)
-                                     ) || (scalar(@sheets) && grep(/$gotSheetName/,@sheets) )) {
+                                if ((   defined $spec
+                                      && exists $spec->{uc($gotSheetName)}
+                                      && exists $spec->{uc($gotSheetName)}->{$col}
+                                      && exists $spec->{uc($gotSheetName)}->{$col}->{$row}
+                                      && exists $spec->{uc($gotSheetName)}->{$col}->{$row}->{$SPECIAL_CASE}
+                                    )
+                                    ||
+                                    (@sheets && grep(/$gotSheetName/,@sheets))
+                                   ) {
 
                                     _log_message("INFO: [NUMBER]:[$gotSheetName]:[SPC][".
                                                  ($row)."][".($col)."]:[$gotData][$expData] ... ");
@@ -282,26 +302,56 @@ sub compare_excel {
                         }
                     }
                     else {
-                        if (uc($gotData) ne uc($expData)) {
-                            _log_message("INFO: [STRING]:[$gotSheetName]:[$expData][$gotData] ... [FAIL]\n");
-                            if (defined $rule) {
-                                $error_on_sheet++;
-                                $status = 0;
+                        # Is it regex?
+                        if ((   defined $spec
+                              && exists $spec->{uc($gotSheetName)}
+                              && exists $spec->{uc($gotSheetName)}->{$col}
+                              && exists $spec->{uc($gotSheetName)}->{$col}->{$row}
+                              && exists $spec->{uc($gotSheetName)}->{$col}->{$row}->{$REGEX_CASE}
+                            )
+                            ||
+                            (   exists $spec->{ALL}->{$col}
+                             && exists $spec->{ALL}->{$col}->{$row}
+                             && exists $spec->{ALL}->{$col}->{$row}->{$REGEX_CASE}
+                            )
+                            ||
+                            (@sheets && grep(/$gotSheetName/,@sheets))
+                           ) {
+                            my $exp = qr{$spec->{uc($gotSheetName)}->{$col}->{$row}->{$REGEX_CASE}};
+                            if (($gotData =~ /$exp/i) && ($expData =~ /$exp/i)) {
+                                $status = 1;
+                                _log_message("INFO: [REGEX]:[$gotSheetName]:[".
+                                ($row)."][".($col)."]:[$gotData][$expData] ... [PASS]\n");
                             }
                             else {
-                                return 0;
+                                _log_message("INFO: [REGEX]:[$gotSheetName]:[$expData][$gotData][$exp] ... [FAIL]\n");
+                                $status = 0;
                             }
                         }
                         else {
-                            $status = 1;
-                            _log_message("INFO: [STRING]:[$gotSheetName]:[STD][".
-                                         ($row)."][".($col)."]:[$gotData][$expData] ... [PASS]\n");
+                            # String like data?
+                            if (uc($gotData) ne uc($expData)) {
+                                _log_message("INFO: [STRING]:[$gotSheetName]:[$expData][$gotData] ... [FAIL]\n");
+                                if (defined $rule) {
+                                    $error_on_sheet++;
+                                    $status = 0;
+                                }
+                                else {
+                                    return 0;
+                                }
+                            }
+                            else {
+                                $status = 1;
+                                _log_message("INFO: [STRING]:[$gotSheetName]:[STD][".
+                                    ($row)."][".($col)."]:[$gotData][$expData] ... [PASS]\n");
+                            }
                         }
                     }
 
-                    if ((exists $rule->{swap_check})
-                        && defined($rule->{swap_check})
-                        && ($rule->{swap_check})) {
+                    if (    exists $rule->{swap_check}
+                        && defined $rule->{swap_check}
+                        && $rule->{swap_check}
+                       ) {
                         if ($status == 0) {
                             $error_on_sheet++;
                             push @{$swap->{exp}->{_number_to_letter($col)}}, $expData;
@@ -329,9 +379,10 @@ sub compare_excel {
             }
         } # row
 
-        if (exists($rule->{swap_check})
-            && defined($rule->{swap_check})
-            && ($rule->{swap_check})) {
+        if (    exists $rule->{swap_check}
+            && defined $rule->{swap_check}
+            && $rule->{swap_check}
+           ) {
             if (($error_on_sheet > 0) && _is_swapping($swap)) {
                 _log_message("WARN: SWAP OCCURRED.\n");
                 $status = 1;
@@ -374,6 +425,27 @@ values are space seperated.
     sheet       Sheet2
     range       A1:B2
     ignorerange B3:B8
+
+As in C<v1.51> or above, we now support the use of C<regex> in the specification
+file.
+
+The following specification forces regex comparison in all sheets in range C<B2:B4>.
+
+    sheet ALL
+    range B2:B4
+    regex 2022\-\d\d\-\d\d
+
+The following specification forces regex comparison in all sheets.
+
+    sheet ALL
+    regex 2022\-\d\d\-\d\d
+
+The following specification forces regex comparison in the sheet named C<Demo>
+in range C<B2:B4>.
+
+    sheet Demo
+    range B2:B4
+    regex 2022\-\d\d\-\d\d
 
 =head1 What is "Visually" Similar?
 
@@ -492,6 +564,7 @@ sub _parse {
 
     my $data   = undef;
     my $sheet  = undef;
+    my $regex  = undef;
     my $handle = IO::File->new($spec) || die("ERROR: Couldn't open file [$spec][$!].\n");
 
     while (my $row = <$handle>) {
@@ -502,16 +575,24 @@ sub _parse {
         if ($row =~ /^sheet\s+(.*)/i) {
             $sheet = $1;
         }
-        elsif (defined($sheet) && ($row =~ /^range\s+(.*)/i)) {
+        elsif (defined $sheet && ($row =~ /^range\s+(.*)/i)) {
             my $cells = Test::Excel::_cells_within_range($1);
-            foreach (@{$cells}) {
-                $data->{uc($sheet)}->{$_->{col}+1}->{$_->{row}} = $SPECIAL_CASE;
+            foreach my $cell (@{$cells}) {
+                $data->{uc($sheet)}->{$cell->{col}+1}->{$cell->{row}}->{$SPECIAL_CASE} = 1
+            }
+        }
+        elsif (defined($sheet) && ($row =~ /^regex\s+(.*)/i)) {
+            foreach my $c (keys %{$data->{uc($sheet)}}) {
+                foreach my $r (keys %{$data->{uc($sheet)}->{$c}}) {
+                    # Needs overriding to be regex friendly
+                    $data->{uc($sheet)}->{$c}->{$r}->{$REGEX_CASE} = $1;
+                }
             }
         }
         elsif (defined($sheet) && ($row =~ /^ignorerange\s+(.*)/i)) {
             my $cells = Test::Excel::_cells_within_range($1);
-            foreach (@{$cells}) {
-                $data->{uc($sheet)}->{$_->{col}+1}->{$_->{row}} = $IGNORE;
+            foreach my $cell (@{$cells}) {
+                $data->{uc($sheet)}->{$cell->{col}+1}->{$cell->{row}}->{$IGNORE} = 1;
             }
         }
         else {
@@ -567,7 +648,7 @@ sub _validate_rule {
 
     my ($keys, $valid);
     $keys = scalar(keys(%{$rule}));
-    return if (($keys == 1) && exists($rule->{message}));
+    return if (($keys == 1) && exists $rule->{message});
 
     die("ERROR: Rule has more than 8 keys defined.\n")
         if $keys > 8;
@@ -581,26 +662,35 @@ sub _validate_rule {
               'swap_check'      => 7,
               'test'            => 8,};
 
-    foreach (keys %{$rule}) {
-        die("ERROR: Invalid key '$_' found in the rule definitions.\n")
-            unless exists($valid->{$_});
+    foreach my $key (keys %{$rule}) {
+        die "ERROR: Invalid key '$key' found in the rule definitions.\n"
+            unless exists($valid->{$key});
     }
 
     return if (exists $rule->{spec} && (keys %$rule == 1));
 
-    if ((exists($rule->{spec}) && defined($rule->{spec}))
-        || (exists($rule->{sheet}) && defined($rule->{sheet}))) {
-        die("ERROR: Missing key sheet_tolerance in the rule definitions.\n")
-            unless (exists($rule->{sheet_tolerance}) && defined($rule->{sheet_tolerance}));
-        die("ERROR: Missing key tolerance in the rule definitions.\n")
-            unless (exists($rule->{tolerance}) && defined($rule->{tolerance}));
+    if ((exists $rule->{spec}  && defined $rule->{spec})
+        ||
+        (exists $rule->{sheet} && defined $rule->{sheet})
+       ) {
+        die "ERROR: Missing key sheet_tolerance in the rule definitions.\n"
+            unless (    exists $rule->{sheet_tolerance}
+                    && defined $rule->{sheet_tolerance});
+        die "ERROR: Missing key tolerance in the rule definitions.\n"
+            unless (    exists $rule->{tolerance}
+                    && defined $rule->{tolerance});
     }
     else {
-        if ( (exists($rule->{sheet_tolerance}) && defined($rule->{sheet_tolerance}))
-             || (exists($rule->{tolerance}) && defined($rule->{tolerance})) ) {
-            die("ERROR: Missing key sheet/spec in the rule definitions.\n")
-                unless ((exists($rule->{sheet}) && defined($rule->{sheet}))
-                        || (exists($rule->{spec}) && defined($rule->{spec})));
+        if ((exists $rule->{sheet_tolerance} && defined $rule->{sheet_tolerance})
+            ||
+            (exists $rule->{tolerance}       && defined $rule->{tolerance})
+           ) {
+            die "ERROR: Missing key sheet/spec in the rule definitions.\n"
+                unless (
+                        (exists $rule->{sheet} && defined $rule->{sheet})
+                        ||
+                        (exists $rule->{spec}  && defined $rule->{spec})
+                       );
         }
     }
 }
