@@ -39,7 +39,7 @@ my $TESTER               = Test::Builder->new;
 
 This  module is meant to be used for testing  custom  generated  Excel  files, it
 provides interfaces to compare_excel two Excel files if they are I<visually> same.
-It now supports Excel file with extension C<.xls> and C<.xlsx>.
+It now supports Excel files with the extensions C<.xls> or C<.xlsx>.
 
 =head1 SYNOPSIS
 
@@ -72,8 +72,8 @@ Using as standalone as below:
 =head2 cmp_excel($got, $exp, \%rule, $message)
 
 This function will tell you whether the two Excel files are "visually" different,
-ignoring differences  in  embedded  fonts / images and metadata.Both C<$got> and
-C<$exp>  can be either instance of L<Spreadsheet::Read> / file path (which is in
+ignoring differences in embedded fonts / images and metadata. Both C<$got> and
+C<$exp> can be either instance of L<Spreadsheet::Read> / file path (which is in
 turn passed to the L<Spreadsheet::Read> constructor).
 This one is for use in TEST MODE.
 
@@ -123,10 +123,10 @@ sub cmp_excel_not_ok {
 
 =head2 compare_excel($got, $exp, \%rule)
 
-Same as C<cmp_excel_ok()> but ideal for non TEST MODE.
+Same as C<cmp_excel_ok()> but ideal for non-TEST MODE.
 This function will tell you whether the two Excel files are "visually" different,
-ignoring differences  in  embedded  fonts / images and metadata.Both C<$got> and
-C<$exp>  can be either instance of L<Spreadsheet::Read> / file path (which is in
+ignoring differences in embedded fonts / images and metadata. Both C<$got> and
+C<$exp> can be either instance of L<Spreadsheet::Read> / file path (which is in
 turn passed to the L<Spreadsheet::Read> constructor).
 
     use strict; use warnings;
@@ -397,7 +397,7 @@ sub compare_excel {
 
 =head1 RULE
 
-The paramter C<rule> can be used optionally to apply exception when comparing the
+The parameter C<rule> can be used optionally to apply exception when comparing the
 contents. This should be passed in as has ref and may contain keys from the table
 below.
 
@@ -416,8 +416,8 @@ below.
 
 =head1 SPECIFICATION FILE
 
-Spec  file containing rules used should be in the format mentioned below. Key and
-values are space seperated.
+A spec file containing rules used should be in the format mentioned below. Keys
+and values are space-separated.
 
     sheet       Sheet1
     range       A3:B14
@@ -447,18 +447,18 @@ in range C<B2:B4>.
     range B2:B4
     regex 2022\-\d\d\-\d\d
 
-=head1 What is "Visually" Similar?
+=head1 What Is "Visually" Similar?
 
-This module uses  the L<Spreadsheet::Read> module  to parse the Excel files, then
-compares the parsed  data structure for differences.We ignore certain  components
-of the Excel file, such as embedded fonts,  images,  forms and  annotations,  and
-focus  entirely  on  the layout of each Excel page instead.  Future versions will
-likely support font and image comparisons.
+This module uses the L<Spreadsheet::Read> module to parse the Excel files and
+then compares the parsed data structure for differences. It ignores certain
+components of the Excel file, such as embedded fonts, images, forms, and
+annotations, and focuses entirely on the layout of each Excel page instead.
+Future versions may support font and image comparisons as well.
 
 =head1 How to find out what failed the comparison?
 
-By turning the environment variable DEBUG ON would spit out PASS/FAIL comparison.
-For example:
+Setting the environment variable DEBUG to a non-zero, non-empty value will output
+the PASS/FAIL comparison. For example:
 
     $/> $DEBUG=1 perl your-test-script.pl
 
@@ -697,24 +697,24 @@ sub _validate_rule {
 
 =head1 NOTES
 
-It should be clearly noted that this module does not claim to provide  fool-proof
-comparison of generated Excels. In fact there are still a number of ways in which
-I want to expand the existing comparison functionality. This module  is no longer
- actively being developed as I moved to another company.This work was part of one
-of my project. Having said, I would be more than happy to add new features if its
-requested. Any suggestions / ideas most welcome.
+It should be clearly noted that this module does not claim to provide fool-proof
+comparison of generated Excel files. In fact there are still a number of ways in
+which I want to expand the existing comparison functionality. This module is no
+longer actively being developed as I moved to another company. This work was part
+of one of my projects. Having said that, I would be more than happy to add new
+features if requested. Any suggestions / ideas most welcome.
 
 =head1 CAVEATS
 
-Testing of large Excels can take a long time, this is because, well, we are doing
-a lot of computation. In fact, this   module   test  suite includes tests against
-several  large  Excels,  however I am not including those in this distibution for
+Testing large Excel files can take a long time. This is because, well, it is doing
+a lot of computation. In fact, the test suite for this module includes tests against
+several large Excel files; however, I am not including those in this distibution for
 obvious reasons.
 
 =head1 BUGS
 
-None that I am aware of.Of course, if you find a bug, let me know, and I would do
-my best  to fix it.  This is still a very early version, so it is always possible
+None that I am aware of. Of course, if you find a bug, let me know, and I would do
+my best to fix it. This is still a very early version, so it is always possible
 that I have just "gotten it wrong" in some places.
 
 =head1 SEE ALSO
@@ -747,7 +747,7 @@ L<https://github.com/manwar/Test-Excel>
 
 =head1 BUGS
 
-Please  report  any bugs or feature requests to C<bug-test-excel at rt.cpan.org>,
+Please report any bugs or feature requests to C<bug-test-excel at rt.cpan.org>,
 or through the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Excel>.
 I will be notified, and then you'll automatically be notified of progress on your
 bug as I make changes.
