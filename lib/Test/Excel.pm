@@ -416,8 +416,8 @@ below.
 
 =head1 SPECIFICATION FILE
 
-Spec file containing rules used should be in the format mentioned below. Keys and
-values are space-separated.
+A spec file containing rules used should be in the format mentioned below. Keys
+and values are space-separated.
 
     sheet       Sheet1
     range       A3:B14
@@ -449,16 +449,16 @@ in range C<B2:B4>.
 
 =head1 What Is "Visually" Similar?
 
-This module uses the L<Spreadsheet::Read> module to parse the Excel files, then
-compares the parsed data structure for differences. We ignore certain components
-of the Excel file, such as embedded fonts, images, forms and annotations, and
-focus entirely on the layout of each Excel page instead. Future versions will
-likely support font and image comparisons.
+This module uses the L<Spreadsheet::Read> module to parse the Excel files and
+then compares the parsed data structure for differences. It ignores certain
+components of the Excel file, such as embedded fonts, images, forms, and
+annotations, and focuses entirely on the layout of each Excel page instead.
+Future versions may support font and image comparisons as well.
 
 =head1 How to find out what failed the comparison?
 
-Turning the environment variable DEBUG ON will output the PASS/FAIL comparison.
-For example:
+Setting the environment variable DEBUG to a non-zero, non-empty value will output
+the PASS/FAIL comparison. For example:
 
     $/> $DEBUG=1 perl your-test-script.pl
 
