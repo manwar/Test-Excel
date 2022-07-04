@@ -1,5 +1,12 @@
 Revision history for Perl extension Test::Excel.
 
+1.53  Mon Jul 04 19:40:00 2022
+      - Spelling, grammar, and whitespace fixes to docs, thanks @esabol.
+      - Updated workflow settings.
+      - Added section CONTRIBUTORS to the pod.
+      - Updated copyright year informations.
+      - Removed dead links from the pod.
+
 1.52  Sun Jul 03 17:10:00 2022
       - Tidied up unit test.
 

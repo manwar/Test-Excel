@@ -72,7 +72,7 @@ jobs:
       - name: META.yml
         run: cat build/META.yml
       - name: Perldoc
-        run: perldoc -TF  lib/**/*.{pm,pod} 
+        run: perldoc -TF  lib/**/*.{pm,pod}
   test:
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     needs: dist
@@ -83,11 +83,11 @@ jobs:
         os: [ 'ubuntu-latest', 'macos-latest' ]
         perl: [ '5.10', '5.16', '5.18', '5.20', '5.22', '5.24',' 5.26',' 5.28', '5.30', '5.32', 'latest' ]
         experimental: [ false ]
-        include:
+        #include:
           # SpreadSheet::ParseXLSX needs at least 5.10
-          - os: 'ubuntu-latest'
-            perl: '5.8' 
-            experimental: true
+        #  - os: 'ubuntu-latest'
+        #    perl: '5.8'
+        #    experimental: true
     steps:
       - name: Get dist artifact
         uses: actions/download-artifact@v2

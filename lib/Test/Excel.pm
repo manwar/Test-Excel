@@ -1,6 +1,6 @@
 package Test::Excel;
 
-$Test::Excel::VERSION   = '1.52';
+$Test::Excel::VERSION   = '1.53';
 $Test::Excel::AUTHORITY = 'cpan:MANWAR';
 
 =head1 NAME
@@ -9,7 +9,7 @@ Test::Excel - Interface to test and compare Excel files (.xls/.xlsx).
 
 =head1 VERSION
 
-Version 1.52
+Version 1.53
 
 =cut
 
@@ -426,10 +426,11 @@ and values are space-separated.
     range       A1:B2
     ignorerange B3:B8
 
-As in C<v1.51> or above, we now support the use of C<regex> in the specification
-file.
+As in C<v1.51> or above, we now support the use of C<regex> in the
+specification file.
 
-The following specification forces regex comparison in all sheets in range C<B2:B4>.
+The following specification forces regex comparison in all sheets in
+range C<B2:B4>.
 
     sheet ALL
     range B2:B4
@@ -440,8 +441,8 @@ The following specification forces regex comparison in all sheets.
     sheet ALL
     regex 2022\-\d\d\-\d\d
 
-The following specification forces regex comparison in the sheet named C<Demo>
-in range C<B2:B4>.
+The following specification forces regex comparison in the sheet
+named C<Demo> in range C<B2:B4>.
 
     sheet Demo
     range B2:B4
@@ -449,18 +450,19 @@ in range C<B2:B4>.
 
 =head1 What Is "Visually" Similar?
 
-This module uses the L<Spreadsheet::Read> module to parse the Excel files and
-then compares the parsed data structure for differences. It ignores certain
-components of the Excel file, such as embedded fonts, images, forms, and
-annotations, and focuses entirely on the layout of each Excel page instead.
-Future versions may support font and image comparisons as well.
+This module uses the L<Spreadsheet::Read> module to parse the Excel
+files and then compares the parsed data structure for differences. It
+ignores certain components of the Excel file, such as embedded fonts,
+images, forms and annotations, and focuses entirely on the layout of
+each Excel page instead. Future versions may support font and image
+comparisons as well.
 
 =head1 How to find out what failed the comparison?
 
-Setting the environment variable DEBUG to a non-zero, non-empty value will output
-the PASS/FAIL comparison. For example:
+Setting the environment variable DEBUG to a non-zero, non-empty value
+will output the PASS/FAIL comparison. For example:
 
-    $/> $DEBUG=1 perl your-test-script.pl
+    $> $DEBUG=1 perl your-test-script.pl
 
 =cut
 
@@ -473,7 +475,8 @@ sub _column_row {
 
     return unless defined $cell;
 
-    die("ERROR: Invalid cell address [$cell].\n") unless ($cell =~ /([A-Za-z]+)(\d+)/);
+    die "ERROR: Invalid cell address [$cell].\n"
+        unless ($cell =~ /([A-Za-z]+)(\d+)/);
 
     return ($1, $2);
 }
@@ -484,9 +487,9 @@ sub _letter_to_number {
     return col2int($letter);
 }
 
-# --------------------------------------------------------------------------
+# -------------------------------------------------------------------
 # col2int (for Spreadsheet::ParseExcel::Utility)
-# --------------------------------------------------------------------------
+# -------------------------------------------------------------------
 sub col2int {
     my $result = 0;
     my $str    = shift;
@@ -512,9 +515,9 @@ sub _number_to_letter {
     return int2col($number);
 }
 
-# --------------------------------------------------------------------------
+# -------------------------------------------------------------------
 # int2col (for Spreadsheet::ParseExcel::Utility)
-# --------------------------------------------------------------------------
+# -------------------------------------------------------------------
 sub int2col {
     my $out = "";
     my $val = shift;
@@ -534,7 +537,7 @@ sub _cells_within_range {
 
     my $cells = [];
     foreach my $_range (split /\,/,$range) {
-        die("ERROR: Invalid range [$_range].\n")
+        die "ERROR: Invalid range [$_range].\n"
             unless ($_range =~ /(\w+\d+):(\w+\d+)/);
 
         my $from = $1;
@@ -560,12 +563,14 @@ sub _parse {
 
     return unless defined $spec;
 
-    die("ERROR: Unable to locate spec file [$spec][$!].\n") unless (-f $spec);
+    die "ERROR: Unable to locate spec file [$spec][$!].\n"
+        unless (-f $spec);
 
     my $data   = undef;
     my $sheet  = undef;
     my $regex  = undef;
-    my $handle = IO::File->new($spec) || die("ERROR: Couldn't open file [$spec][$!].\n");
+    my $handle = IO::File->new($spec)
+        || die "ERROR: Couldn't open file [$spec][$!].\n";
 
     while (my $row = <$handle>) {
         chomp($row);
@@ -596,7 +601,7 @@ sub _parse {
             }
         }
         else {
-            die("ERROR: Invalid format data [$row] found in spec file.\n");
+            die "ERROR: Invalid format data [$row] found in spec file.\n";
         }
     }
 
@@ -643,24 +648,26 @@ sub _validate_rule {
 
     return unless defined $rule;
 
-    die("ERROR: Invalid RULE definitions. It has to be reference to a HASH.\n")
+    die "ERROR: Invalid RULE definitions. It has to be reference to a HASH.\n"
         unless (ref($rule) eq 'HASH');
 
     my ($keys, $valid);
     $keys = scalar(keys(%{$rule}));
     return if (($keys == 1) && exists $rule->{message});
 
-    die("ERROR: Rule has more than 8 keys defined.\n")
+    die "ERROR: Rule has more than 8 keys defined.\n"
         if $keys > 8;
 
-    $valid = {'message'         => 1,
-              'sheet'           => 2,
-              'spec'            => 3,
-              'tolerance'       => 4,
-              'sheet_tolerance' => 5,
-              'error_limit'     => 6,
-              'swap_check'      => 7,
-              'test'            => 8,};
+    $valid = {
+        'message'         => 1,
+        'sheet'           => 2,
+        'spec'            => 3,
+        'tolerance'       => 4,
+        'sheet_tolerance' => 5,
+        'error_limit'     => 6,
+        'swap_check'      => 7,
+        'test'            => 8,
+    };
 
     foreach my $key (keys %{$rule}) {
         die "ERROR: Invalid key '$key' found in the rule definitions.\n"
@@ -741,6 +748,16 @@ that I have just "gotten it wrong" in some places.
 
 Mohammad S Anwar, C<< <mohammad.anwar at yahoo.com> >>
 
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item * Julien Fiegehenn
+
+=item * Ed Sabol
+
+=back
+
 =head1 REPOSITORY
 
 L<https://github.com/manwar/Test-Excel>
@@ -762,9 +779,9 @@ You can also look for information at:
 
 =over 4
 
-=item * RT: CPAN's request tracker (report bugs here)
+=item * BUG Report
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Test-Excel>
+L<https://github.com/manwar/Test-Excel/issues>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
@@ -774,15 +791,15 @@ L<http://annocpan.org/dist/Test-Excel>
 
 L<http://cpanratings.perl.org/d/Test-Excel>
 
-=item * Search CPAN
+=item * Search MetaCPAN
 
-L<http://search.cpan.org/dist/Test-Excel/>
+L<https://metacpan.org/dist/Test-Excel/>
 
 =back
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2010 - 2016 Mohammad S Anwar.
+Copyright (C) 2010 - 2022 Mohammad S Anwar.
 
 This  program  is  free software; you can redistribute it  and/or modify it under
 the  terms  of the the Artistic License (2.0). You may  obtain a copy of the full
